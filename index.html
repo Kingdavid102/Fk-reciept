@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReceiptCraft Pro - Professional Receipt Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="landing-page">
+    <div class="landing-container">
+        <!-- Navigation -->
+        <nav class="landing-nav">
+            <div class="nav-content">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    <span>ReceiptCraft Pro</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="auth.html" class="btn-secondary">Login</a>
+                    <a href="auth.html?mode=signup" class="btn-primary">Get Started</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Create Professional Receipts in Seconds</h1>
+                    <p>Generate authentic-looking receipts for all major payment platforms. Perfect for businesses, freelancers, and personal use.</p>
+                    <div class="hero-buttons">
+                        <a href="auth.html?mode=signup" class="btn-primary large">Start Creating Now</a>
+                        <a href="#features" class="btn-secondary large">Learn More</a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="receipt-preview">
+                        <div class="receipt-sample">
+                            <div class="receipt-header">
+                                <div class="receipt-logo"></div>
+                                <h3>Payment Successful</h3>
+                            </div>
+                            <div class="receipt-amount">$2,500.00</div>
+                            <div class="receipt-details">
+                                <div class="detail-row">
+                                    <span>To: John Doe</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Date: Today</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <div class="section-content">
+                <h2>Everything You Need</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                <line x1="1" y1="10" x2="23" y2="10"/>
+                            </svg>
+                        </div>
+                        <h3>Multiple Platforms</h3>
+                        <p>Support for PayPal, Zelle, Cash App, Bitcoin, Bank transfers, and more</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <h3>Secure & Private</h3>
+                        <p>Your data is encrypted and never stored on our servers</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            </svg>
+                        </div>
+                        <h3>Lightning Fast</h3>
+                        <p>Generate professional receipts in under 30 seconds</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="pricing">
+            <div class="section-content">
+                <h2>Choose Your Plan</h2>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3>Free</h3>
+                        <div class="price">$0<span>/month</span></div>
+                        <ul>
+                            <li>View receipt templates</li>
+                            <li>Basic support</li>
+                            <li>Limited access</li>
+                        </ul>
+                        <a href="auth.html?mode=signup" class="btn-secondary">Get Started</a>
+                    </div>
+                    <div class="pricing-card premium">
+                        <div class="popular-badge">Most Popular</div>
+                        <h3>Premium</h3>
+                        <div class="price">$19<span>/month</span></div>
+                        <ul>
+                            <li>Unlimited receipt generation</li>
+                            <li>All payment platforms</li>
+                            <li>Priority support</li>
+                            <li>Custom branding</li>
+                        </ul>
+                        <a href="auth.html?mode=signup" class="btn-primary">Go Premium</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="landing-footer">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    <span>ReceiptCraft Pro</span>
+                </div>
+                <p>&copy; 2024 ReceiptCraft Pro. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

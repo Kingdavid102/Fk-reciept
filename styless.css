@@ -1,0 +1,1580 @@
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Login page */
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-container h1 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.card-header h2 {
+  margin-bottom: 5px;
+  font-size: 1.5rem;
+}
+
+.card-header h3 {
+  margin-bottom: 5px;
+  font-size: 1.2rem;
+}
+
+.card-header p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  text-align: right;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-group button {
+  width: 100%;
+  padding: 12px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.form-group button:hover {
+  background-color: #0060df;
+}
+
+.form-group button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+/* Dashboard */
+.main-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0 20px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.header-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.main-header h1 {
+  font-size: 1.8rem;
+  color: white;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.user-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  color: #333;
+  text-decoration: none;
+  display: block;
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 5px 0;
+}
+
+.user-info {
+  cursor: default;
+  background-color: #f9f9f9;
+}
+
+.user-info:hover {
+  background-color: #f9f9f9;
+}
+
+.user-name {
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: #333;
+}
+
+.user-role {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.dashboard-container h2 {
+  margin-bottom: 25px;
+  font-size: 2rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.receipt-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: 1px solid #eaeaea;
+}
+
+.receipt-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: #d0d0d0;
+}
+
+.receipt-card .card-header {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.receipt-card .card-header h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.receipt-card .card-header p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.receipt-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px;
+  color: #666;
+}
+
+.icon-blue {
+  color: #0070f3;
+}
+
+.icon-purple {
+  color: #7928ca;
+}
+
+.icon-green {
+  color: #0070f3;
+}
+
+/* Receipt creation page */
+.back-button {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.back-button svg {
+  margin-right: 8px;
+}
+
+.receipt-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Receipt preview styles */
+.receipt-preview {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.receipt {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.receipt-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button-primary {
+  flex: 1;
+  padding: 12px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-primary:hover {
+  background-color: #0060df;
+  transform: translateY(-2px);
+}
+
+.button-secondary {
+  flex: 1;
+  padding: 12px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-secondary:hover {
+  background-color: #e5e5e5;
+  transform: translateY(-2px);
+}
+
+/* Bank Transfer Receipt */
+.bank-transfer {
+  font-family: Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.bank-transfer .bank-header {
+  background-color: #1a73e8;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.bank-transfer .bank-header h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.bank-transfer .bank-logo {
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+}
+
+.bank-transfer .bank-logo svg {
+  width: 40px;
+  height: 40px;
+  color: #1a73e8;
+}
+
+.bank-transfer .receipt-status {
+  padding: 20px;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.bank-transfer .status-success {
+  color: #0f9d58;
+}
+
+.bank-transfer .status-pending {
+  color: #f4b400;
+}
+
+.bank-transfer .status-failed,
+.bank-transfer .status-rejected {
+  color: #db4437;
+}
+
+.bank-transfer .receipt-details {
+  padding: 20px;
+}
+
+.bank-transfer .receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.bank-transfer .receipt-label {
+  color: #5f6368;
+  font-weight: normal;
+}
+
+.bank-transfer .receipt-value {
+  font-weight: 500;
+  text-align: right;
+}
+
+.bank-transfer .receipt-footer {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.bank-transfer .bank-button {
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Credit Card Receipt */
+.credit-card {
+  font-family: Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.credit-card .card-header {
+  background-color: #6200ee;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.credit-card .card-logo {
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+}
+
+.credit-card .card-logo svg {
+  width: 40px;
+  height: 40px;
+  color: #6200ee;
+}
+
+.credit-card .receipt-status {
+  padding: 20px;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.credit-card .status-success {
+  color: #0f9d58;
+}
+
+.credit-card .status-pending {
+  color: #f4b400;
+}
+
+.credit-card .status-failed,
+.credit-card .status-rejected {
+  color: #db4437;
+}
+
+.credit-card .receipt-details {
+  padding: 20px;
+}
+
+.credit-card .receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.credit-card .receipt-label {
+  color: #5f6368;
+  font-weight: normal;
+}
+
+.credit-card .receipt-value {
+  font-weight: 500;
+  text-align: right;
+}
+
+.credit-card .card-type {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.credit-card .card-type svg {
+  margin-left: 8px;
+  width: 30px;
+  height: 20px;
+}
+
+.credit-card .receipt-footer {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.credit-card .card-button {
+  background-color: #6200ee;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Bank of America Receipt */
+.bank-of-america {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  text-align: center;
+}
+
+.boa-content {
+  padding: 20px;
+}
+
+.boa-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #000;
+  text-align: left;
+}
+
+.boa-logo-container {
+  margin: 30px 0;
+  text-align: center;
+}
+
+.boa-logo {
+  max-width: 240px;
+  height: auto;
+}
+
+.boa-thumbs-up {
+  margin: 30px auto;
+  text-align: center;
+}
+
+.boa-circle {
+  width: 100px;
+  height: 100px;
+  background-color: #f5f5f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.boa-thumb-img {
+  width: 110px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.boa-subtitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #000;
+  text-align: left;
+}
+
+.boa-details {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.boa-view-balance {
+  width: 100%;
+  padding: 15px;
+  background-color: #0052cc;
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.boa-confirmation {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.boa-actions {
+  display: flex;
+  justify-content: space-between;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.boa-action-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wells-fargo {
+  font-family: Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.wells-fargo .wells-fargo-header {
+  background-color: #d71e28;
+  color: white;
+  padding: 15px 20px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.wells-fargo .receipt-subheader {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.wells-fargo .receipt-subheader h3 {
+  color: #333;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.wells-fargo .receipt-status-box {
+  display: flex;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  margin: 15px 20px;
+  border-radius: 4px;
+}
+
+.wells-fargo .wells-fargo-icon {
+  background-color: #4caf50;
+  margin: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wells-fargo .wells-fargo-status-text {
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.wells-fargo .receipt-details {
+  padding: 0 20px;
+}
+
+.wells-fargo .receipt-row {
+  display: flex;
+  padding: 15px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.wells-fargo .receipt-label {
+  color: #666;
+  font-weight: normal;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.wells-fargo .receipt-value {
+  font-weight: normal;
+  text-align: left;
+}
+
+.wells-fargo .receipt-subtext {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 2px;
+}
+
+.wells-fargo .receipt-footer {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+}
+
+.wells-fargo .receipt-note {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: left;
+  line-height: 1.4;
+}
+
+/* Cash App Receipt */
+.cash-app {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #000;
+  color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.cash-app .receipt-status {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.cash-app .status-icon-container {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.cash-app h3 {
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.cash-app p {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.cash-app .receipt-footer {
+  padding: 20px;
+  text-align: center;
+}
+
+.cash-app .cash-app-button {
+  width: 100%;
+  padding: 15px;
+  background-color: #00d632;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Bitcoin Receipt */
+.bitcoin {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #121d33;
+  color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.bitcoin .receipt-status {
+  padding: 40px 20px;
+}
+
+.bitcoin .bitcoin-icon {
+  margin: 0 auto 20px;
+  width: 60px;
+  height: 60px;
+}
+
+.bitcoin h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.bitcoin p {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-bottom: 15px;
+}
+
+.bitcoin .wallet-address {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.bitcoin .wallet-address-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.bitcoin .receipt-footer {
+  padding: 20px;
+}
+
+.bitcoin .bitcoin-button {
+  width: 100%;
+  padding: 15px;
+  background-color: #1652f0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Coinbase Receipt */
+.coinbase {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.coinbase .coinbase-header {
+  background-color: #0052ff;
+  padding: 20px;
+  text-align: center;
+}
+
+.coinbase .coinbase-logo {
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+}
+
+.coinbase .coinbase-logo svg {
+  width: 25px;
+  height: 25px;
+  color: #0052ff;
+}
+
+.coinbase .receipt-status {
+  padding: 30px 20px;
+  text-align: center;
+  background-color: white;
+}
+
+.coinbase .status-success {
+  color: #05b169;
+}
+
+.coinbase .status-pending {
+  color: #ffa500;
+}
+
+.coinbase .status-failed,
+.coinbase .status-rejected {
+  color: #dc143c;
+}
+
+.coinbase h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #333;
+}
+
+.coinbase p {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.coinbase h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.coinbase .wallet-address {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
+  margin: 15px 0;
+  text-align: left;
+  color: #333;
+}
+
+.coinbase .wallet-address-label {
+  display: block;
+  color: #666;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.coinbase .receipt-details {
+  padding: 20px;
+  text-align: left;
+  border-top: 1px solid #eee;
+}
+
+.coinbase .receipt-details p {
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.coinbase .receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.coinbase .receipt-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.coinbase .receipt-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.coinbase .receipt-footer {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.coinbase .receipt-note {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+/* MoneyGram Receipt */
+.moneygram {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.moneygram .receipt-header {
+  background-color: #fff;
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.moneygram .moneygram-logo {
+  margin-bottom: 15px;
+}
+
+.moneygram .receipt-header h2 {
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.moneygram .receipt-details {
+  padding: 20px;
+}
+
+.moneygram .receipt-row {
+  padding: 10px 0;
+}
+
+.moneygram .receipt-label {
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.moneygram .receipt-value {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.moneygram .receipt-footer {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+}
+
+.moneygram .moneygram-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #d22630;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.moneygram .moneygram-button svg {
+  margin-right: 8px;
+}
+
+.moneygram .moneygram-cost {
+  margin-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 15px;
+}
+
+.moneygram .cost-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 0.9rem;
+}
+
+.moneygram .cost-row.total {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* GCash Receipt */
+.gcash {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #0056e4;
+  color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.gcash .receipt-status {
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.gcash .status-icon-container {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+}
+
+.gcash .gcash-details {
+  text-align: center;
+  padding: 20px;
+}
+
+.gcash .gcash-number {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.gcash .gcash-method {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.gcash .receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gcash .receipt-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: normal;
+}
+
+.gcash .receipt-value {
+  font-weight: 500;
+}
+
+.gcash .receipt-footer {
+  padding: 20px;
+  text-align: center;
+}
+
+.gcash .gcash-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(to right, #0056e4, #00c6ff);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.gcash .gcash-button.secondary {
+  background: white;
+  color: #0056e4;
+}
+
+.gcash .receipt-note {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 15px;
+}
+
+/* PayPal Receipt */
+.paypal {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.paypal .receipt-header {
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.paypal .message-header {
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.paypal .message-sender {
+  font-weight: 600;
+  margin-top: 5px;
+  font-size: 0.9rem;
+}
+
+.paypal .message-attachment {
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.paypal .receipt-status {
+  padding: 20px;
+  text-align: center;
+  background-color: #fff;
+}
+
+.paypal .receipt-status h3 {
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.paypal .receipt-details {
+  padding: 0 20px 20px;
+}
+
+.paypal .bank-logo {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.paypal .paypal-message {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.paypal .paypal-message h3 {
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.paypal .paypal-message p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.paypal .paypal-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #0070ba;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.paypal .paypal-confirmation {
+  text-align: center;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+/* Zelle Receipt */
+.zelle {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 20px;
+}
+
+.zelle .warning-icon {
+  width: 80px;
+  height: 80px;
+  margin: 30px auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zelle .warning-icon svg {
+  width: 60px;
+  height: 60px;
+  color: #666;
+}
+
+.zelle .receipt-message {
+  padding: 0 30px;
+  margin-bottom: 30px;
+}
+
+.zelle .receipt-message h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
+}
+
+.zelle .receipt-amount {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 30px 0;
+  color: #000;
+}
+
+.zelle .recipient-avatar {
+  width: 60px;
+  height: 60px;
+  background-color: #aaa;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  position: relative;
+}
+
+.zelle .recipient-avatar .initial {
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.zelle .zelle-icon {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 24px;
+  height: 24px;
+  background-color: #6b1fbf;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zelle .zelle-icon svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+}
+
+.zelle .recipient-info {
+  margin-bottom: 30px;
+}
+
+.zelle .edit-link {
+  color: #0066cc;
+  text-decoration: none;
+  font-size: 1rem;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.zelle .edit-link svg {
+  width: 16px;
+  height: 16px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+.zelle .siri-tip {
+  padding: 20px 30px;
+  margin-bottom: 20px;
+}
+
+.zelle .siri-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.zelle .siri-button img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.zelle .siri-button span {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Citi Receipt */
+.citi {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.citi .success-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+  border: 2px solid #056dae;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.citi .success-icon svg {
+  width: 30px;
+  height: 30px;
+  color: #056dae;
+}
+
+.citi-logo-container {
+  margin: 30px auto;
+  text-align: center;
+}
+
+.citi-logo {
+  max-width: 120px;
+  height: auto;
+}
+
+.citi .receipt-title {
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.citi .receipt-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.citi .receipt-amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 30px 0;
+  color: #000;
+}
+
+.citi .receipt-details {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.citi .receipt-row {
+  margin-bottom: 15px;
+}
+
+.citi .receipt-label {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.citi .receipt-value {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.citi .receipt-note {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.citi .receipt-disclaimer {
+  font-size: 0.8rem;
+  color: #999;
+  line-height: 1.4;
+  margin-top: 20px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .receipt-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .receipt-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .main-header {
+    padding: 0 15px;
+  }
+
+  .main-content {
+    padding: 15px;
+  }
+}

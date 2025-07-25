@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Receipt</title>
+  <link rel="stylesheet" href="styless.css">
+</head>
+<body>
+  <header class="main-header">
+    <div class="header-content">
+      <button id="back-button" class="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back
+      </button>
+      <h1 id="receipt-title">Create Receipt</h1>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="receipt-container">
+      <div id="receipt-form-container" class="card">
+        <div class="card-header">
+          <h2 id="form-title">Create Receipt</h2>
+        </div>
+        <div class="card-body">
+          <form id="receipt-form">
+            <div class="form-group">
+              <label for="name">Recipient Name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+
+            <div id="account-number-group" class="form-group hidden">
+              <label for="accountNumber">Account Number</label>
+              <input type="text" id="accountNumber" name="accountNumber">
+            </div>
+
+            <div id="wallet-address-group" class="form-group hidden">
+              <label for="walletAddress">Wallet Address</label>
+              <input type="text" id="walletAddress" name="walletAddress">
+            </div>
+
+            <div id="address-name-group" class="form-group hidden">
+              <label for="addressName">Address Name (Optional)</label>
+              <input type="text" id="addressName" name="addressName">
+            </div>
+
+            <div class="form-group">
+              <label for="amount">Amount</label>
+              <input type="text" id="amount" name="amount" placeholder="0.00" required>
+            </div>
+
+            <div class="form-group">
+              <label for="note">Note (Optional)</label>
+              <textarea id="note" name="note" placeholder="Add a note..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <option value="successful">Successful</option>
+                <option value="pending">Pending</option>
+                <option value="failed">Failed</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <button type="submit" id="generate-button">Generate Receipt</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="receipt-preview" class="receipt-preview hidden">
+        <!-- Receipt preview will be dynamically inserted here -->
+      </div>
+    </div>
+  </main>
+
+  <script src="receipts.js"></script>
+  <script>
+    // Get selected receipt type from localStorage
+    const selectedReceipt = JSON.parse(localStorage.getItem('selectedReceiptType'));
+    
+    if (!selectedReceipt) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Update page title
+    document.getElementById('receipt-title').textContent = `${selectedReceipt.name} Receipt`;
+    document.getElementById('form-title').textContent = `Create ${selectedReceipt.name} Receipt`;
+    
+    // Show/hide fields based on receipt type
+    if (selectedReceipt.requiresAccountNumber) {
+      document.getElementById('account-number-group').classList.remove('hidden');
+    }
+    
+    if (selectedReceipt.requiresWalletAddress) {
+      document.getElementById('wallet-address-group').classList.remove('hidden');
+      document.getElementById('address-name-group').classList.remove('hidden');
+    }
+
+    // Back button handler
+    document.getElementById('back-button').addEventListener('click', function() {
+      window.location.href = 'dashboard.html';
+    });
+
+    // Form submission handler
+    document.getElementById('receipt-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('name').value,
+        amount: document.getElementById('amount').value,
+        note: document.getElementById('note').value,
+        status: document.getElementById('status').value,
+        accountNumber: document.getElementById('accountNumber').value || '',
+        walletAddress: document.getElementById('walletAddress').value || '',
+        addressName: document.getElementById('addressName').value || '',
+        receiptType: selectedReceipt
+      };
+      
+      // Generate receipt preview
+      generateReceiptPreview(formData);
+      
+      // Hide form, show preview
+      document.getElementById('receipt-form-container').classList.add('hidden');
+      document.getElementById('receipt-preview').classList.remove('hidden');
+    });
+
+    // Generate receipt preview based on receipt type and form data
+    function generateReceiptPreview(formData) {
+      const previewContainer = document.getElementById('receipt-preview');
+      const { receiptType, status } = formData;
+      
+      // Determine which receipt template to use based on receipt type
+      let receiptHTML = '';
+      
+      // Common status indicators
+      const statusIcons = {
+        successful: `<svg xmlns="http://www.w3.org/2000/svg" class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+        pending: `<svg xmlns="http://www.w3.org/2000/svg" class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
+        failed: `<svg xmlns="http://www.w3.org/2000/svg" class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        rejected: `<svg xmlns="http://www.w3.org/2000/  y1="6" x2="18" y2="18"></line></svg>`,
+        rejected: `<svg xmlns="http://www.w3.org/2000/svg" class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
+      };
+      
+      // Generate confirmation number
+      const confirmationNumber = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const currentDate = new Date().toLocaleDateString();
+      
+      // Choose template based on receipt type
+      switch(receiptType.id) {
+        case 'bank-transfer':
+          receiptHTML = generateBankTransferReceipt(formData, statusIcons, confirmationNumber, currentDate);
+          break;
+        case 'credit-card':
+          receiptHTML = generateCreditCardReceipt(formData, statusIcons, confirmationNumber, currentDate);
+          break;
+        case 'bank-of-america':
+          receiptHTML = generateBankOfAmericaReceipt(formData, statusIcons, confirmationNumber, currentDate);
+          break;
+        case 'cash-app':
+          receiptHTML = generateCashAppReceipt(formData, statusIcons);
+          break;
+        case 'wells-fargo':
+          receiptHTML = generateWellsFargoReceipt(formData, statusIcons, confirmationNumber, currentDate);
+          break;
+        case 'bitcoin':
+          receiptHTML = generateBitcoinReceipt(formData, statusIcons);
+          break;
+        case 'coinbase':
+          receiptHTML = generateCoinbaseReceipt(formData, statusIcons, confirmationNumber);
+          break;
+        case 'moneygram':
+          receiptHTML = generateMoneygramReceipt(formData, statusIcons, confirmationNumber, currentDate);
+          break;
+        case 'gcash':
+          receiptHTML = generateGCashReceipt(formData, statusIcons, confirmationNumber);
+          break;
+        case 'paypal':
+          receiptHTML = generatePayPalReceipt(formData, statusIcons);
+          break;
+        case 'zelle':
+          // Different icons and messages based on status
+          let statusIcon, statusMessage;
+          
+          if (formData.status === 'successful') {
+            statusIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00A650" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>`;
+            statusMessage = `Your payment of $${formData.amount || '2,000.00'} to ${formData.name || 'TYREE'} was sent.`;
+          } else if (formData.status === 'pending') {
+            statusIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>`;
+            statusMessage = `We haven't processed your payment yet. Please check back later to confirm when ${formData.name || 'TYREE'} will receive your money.`;
+          } else {
+            statusIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>`;
+            statusMessage = `Your payment of $${formData.amount || '2,000.00'} to ${formData.name || 'TYREE'} was rejected.`;
+          }
+          
+          receiptHTML = `
+            <div class="receipt zelle">
+              <div class="warning-icon ${formData.status === 'successful' ? 'success-icon' : formData.status === 'pending' ? 'pending-icon' : 'rejected-icon'}">
+                ${statusIcon}
+              </div>
+              
+              <div class="receipt-message">
+                <h2>${statusMessage}</h2>
+              </div>
+              
+              <div class="receipt-amount">
+                $${formData.amount || '2,000.00'}
+              </div>
+              
+              <div class="recipient-avatar">
+                <span class="initial">${formData.name ? formData.name.charAt(0).toUpperCase() : 'T'}</span>
+                <div class="zelle-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="16" height="16">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <div class="recipient-info">
+                ${formData.status === 'successful' ? 'Payment completed successfully.' : formData.status === 'pending' ? 'We added ' + (formData.name || 'TYREE') + ' to your recipients list.' : 'Payment was not processed.'}
+                <br>
+                <a href="#" class="edit-link">
+                  ${formData.status === 'rejected' ? 'Try again' : 'Edit the recipient details'}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </a>
+              </div>
+              
+              <div class="siri-tip">
+                Add a Siri shortcut, such as "Pay ${formData.name || 'TYREE'}," to save time when sending money.
+                
+                <div class="siri-button">
+                  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzOCAzOCI+PHBhdGggZD0iTTE5IDJDOSAyIDEgMTAgMSAyMHM4IDE4IDE4IDE4IDE4LTggMTgtMThTMjkgMiAxOSAyeiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xOSAyQzkgMiAxIDEwIDEgMjBzOCAxOCAxOCAxOCAxOC04IDE4LTE4UzI5IDIgMTkgMnoiIGZpbGw9InVybCgjYSkiLz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImEiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMzggMCAwIDM4IDE5IDIwKSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmU1MjJmIi8+PHN0b3Agb2Zmc2V0PSIuMSIgc3RvcC1jb2xvcj0iI2ZlNTIyZiIvPjxzdG9wIG9mZnNldD0iLjIiIHN0b3AtY29sb3I9IiNmZDZiMmQiLz48c3RvcCBvZmZzZXQ9Ii4zIiBzdG9wLWNvbG9yPSIjZmM4MzJjIi8+PHN0b3Agb2Zmc2V0PSIuNCIgc3RvcC1jb2xvcj0iI2ZjOWIyYSIvPjxzdG9wIG9mZnNldD0iLjUiIHN0b3AtY29sb3I9IiNmYmIyMjgiLz48c3RvcCBvZmZzZXQ9Ii42IiBzdG9wLWNvbG9yPSIjZGZjOTJhIi8+PHN0b3Agb2Zmc2V0PSIuNyIgc3RvcC1jb2xvcj0iI2MzZGYyYyIvPjxzdG9wIG9mZnNldD0iLjgiIHN0b3AtY29sb3I9IiM1OWYxN2YiLz48c3RvcCBvZmZzZXQ9Ii45IiBzdG9wLWNvbG9yPSIjMGZiZGQ0Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGY3OGQ0Ii8+PC9yYWRpYWxHcmFkaWVudD48L2RlZnM+PC9zdmc+" alt="Siri logo" width="30" height="30">
+                  <span>Add to Siri</span>
+                </div>
+              </div>
+            </div>
+          `;
+          break;
+        case 'citi':
+          receiptHTML = generateCitiReceipt(formData, statusIcons, confirmationNumber);
+          break;
+        default:
+          // Generic receipt template
+          receiptHTML = generateGenericReceipt(formData, statusIcons, confirmationNumber, currentDate);
+      }
+      
+      // Add action buttons
+      receiptHTML += `
+        <div class="receipt-actions">
+          <button id="back-to-form" class="button-secondary">Back</button>
+          <button id="done-button" class="button-primary">Done</button>
+        </div>
+      `;
+      
+      previewContainer.innerHTML = receiptHTML;
+      
+      // Add event listeners to buttons
+      document.getElementById('back-to-form').addEventListener('click', function() {
+        document.getElementById('receipt-form-container').classList.remove('hidden');
+        document.getElementById('receipt-preview').classList.add('hidden');
+      });
+      
+      document.getElementById('done-button').addEventListener('click', function() {
+        window.location.href = 'dashboard.html';
+      });
+    }
+
+    // Template generators for each receipt type
+    function generateBankTransferReceipt(formData, statusIcons, confirmationNumber, currentDate) {
+      const statusText = formData.status === 'successful' ? 'Transfer Complete' : 
+                         formData.status === 'pending' ? 'Transfer Pending' : 
+                         'Transfer Failed';
+      
+      return `
+        <div class="receipt bank-transfer">
+          <div class="bank-header">
+            <div class="bank-logo">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
+              </svg>
+            </div>
+            <h2>Bank Transfer</h2>
+          </div>
+          <div class="receipt-status">
+            <h3 class="status-${formData.status}">${statusText}</h3>
+            <p>Transaction ID: ${confirmationNumber}</p>
+          </div>
+          <div class="receipt-details">
+            <div class="receipt-row">
+              <div class="receipt-label">From</div>
+              <div class="receipt-value">Your Account (****${formData.accountNumber ? formData.accountNumber.slice(-4) : '1234'})</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">To</div>
+              <div class="receipt-value">${formData.name}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Account</div>
+              <div class="receipt-value">****${formData.accountNumber ? formData.accountNumber.slice(-4) : '5678'}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Amount</div>
+              <div class="receipt-value">$${formData.amount}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Date</div>
+              <div class="receipt-value">${currentDate}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Note</div>
+              <div class="receipt-value">${formData.note || 'N/A'}</div>
+            </div>
+          </div>
+          <div class="receipt-footer">
+            <button class="bank-button">Download Receipt</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateCreditCardReceipt(formData, statusIcons, confirmationNumber, currentDate) {
+      const statusText = formData.status === 'successful' ? 'Payment Successful' : 
+                         formData.status === 'pending' ? 'Payment Pending' : 
+                         'Payment Failed';
+      
+      return `
+        <div class="receipt credit-card">
+          <div class="card-header">
+            <div class="card-logo">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                <line x1="1" y1="10" x2="23" y2="10"></line>
+              </svg>
+            </div>
+            <h2>Credit Card Payment</h2>
+          </div>
+          <div class="receipt-status">
+            <h3 class="status-${formData.status}">${statusText}</h3>
+            <p>Transaction ID: ${confirmationNumber}</p>
+          </div>
+          <div class="receipt-details">
+            <div class="receipt-row">
+              <div class="receipt-label">Card</div>
+              <div class="receipt-value">
+                <div class="card-type">
+                  ****${formData.accountNumber ? formData.accountNumber.slice(-4) : '4242'}
+                  <svg viewBox="0 0 38 24" width="38" height="24" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity=".07" d="M35 0H3C1.3 0 0 1.3 0 3v18c0 1.7 1.4 3 3 3h32c1.7 0 3-1.3 3-3V3c0-1.7-1.4-3-3-3z"></path>
+                    <path fill="#fff" d="M35 1c1.1 0 2 .9 2 2v18c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V3c0-1.1.9-2 2-2h32"></path>
+                    <path d="M28.3 10.1H28c-.4 1-.7 1.5-1 3h1.9c-.3-1.5-.3-2.2-.6-3zm2.9 5.9h-1.7c-.1 0-.1 0-.2-.1l-.2-.9-.1-.2h-2.4c-.1 0-.2 0-.2.2l-.3.9c0 .1-.1.1-.1.1h-2.1l.2-.5L27 8.7c0-.5.3-.7.8-.7h1.5c.1 0 .2 0 .2.1l1.4 6.5c0 .1.1.2.1.2zm-13.4-.3l.4-1.8c.1 0 .2.1.2.1.7.3 1.4.5 2.1.4.2 0 .5-.1.7-.2.5-.2.5-.7.1-1.1-.2-.2-.5-.3-.8-.5-.4-.2-.8-.4-1.1-.7-1.2-1-.8-2.4-.1-3.1.6-.4.9-.8 1.7-.8 1.2 0 2.5 0 3.1.2h.1c-.1.6-.2 1.1-.4 1.7-.5-.2-1-.4-1.5-.4-.3 0-.6 0-.9.1-.2 0-.3.1-.4.2-.2.2-.2.5 0 .7l.5.4c.4.2.8.4 1.1.6.5.3 1 .8 1.1 1.4.2.9-.1 1.7-.9 2.3-.5.4-.7.6-1.4.6-1.4 0-2.5.1-3.4-.2-.1.2-.1.2-.2.1zm-3.5.3c.1-.7.1-.7.2-1 .5-2.2 1-4.5 1.4-6.7.1-.2.1-.3.3-.3H18c-.2 1.2-.4 2.1-.7 3.2-.3 1.5-.6 3-1 4.5 0 .2-.1.2-.3.2M5 8.2c0-.1.2-.2.3-.2h3.4c.5 0 .9.3 1 .8l.9 4.4c0 .1 0 .1.1.2 0-.1.1-.1.1-.1l2.1-5.1c-.1-.1 0-.2.1-.2h2.1c0 .1 0 .1-.1.2l-3.1 7.3c-.1.2-.1.3-.2.4-.1.1-.3 0-.5 0H9.7c-.1 0-.2 0-.2-.2L7.9 9.5c-.2-.2-.5-.5-.9-.6-.6-.3-1.7-.5-1.9-.5L5 8.2z" fill="#142688"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Merchant</div>
+              <div class="receipt-value">${formData.name}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Amount</div>
+              <div class="receipt-value">$${formData.amount}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Date</div>
+              <div class="receipt-value">${currentDate}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Reference</div>
+              <div class="receipt-value">${confirmationNumber}</div>
+            </div>
+          </div>
+          <div class="receipt-footer">
+            <button class="card-button">Print Receipt</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateBankOfAmericaReceipt(formData, statusIcons, confirmationNumber, currentDate) {
+  return `
+    <div class="receipt bank-of-america">
+      <div class="boa-content">
+        <h2 class="subtitle">You sent $${formData.amount} to ${formData.name}</h2>
+        
+        <div class="boa-logo-container">
+          <img src="emmy.png" alt="Bank of America" class="boa-logo">
+        </div>
+        
+        <div class="boa-thumbs-up">
+          <div class="boa-circle">
+            <img src="thumb.png" class="boa-thumb-img" alt="Thumbs up">
+          </div>
+        </div>
+        
+        <p class="boa-details">You sent $${formData.amount} to ${formData.name}</p>
+        
+        <p class="subtitle">sent from account ending in ${formData.accountNumber ? formData.accountNumber.slice(-4) : '5789'} to ${formData.accountNumber ? formData.accountNumber : '409.313.4494'}</p>
+        
+        <button class="boa-view-balance">View balance</button>
+        
+        <p class="boa-confirmation">Confirmation: ${confirmationNumber.toLowerCase()}</p>
+        
+        <div class="boa-actions">
+          <div class="boa-action-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0066CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </div>
+          <div class="boa-action-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0066CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+    function generateCashAppReceipt(formData, statusIcons) {
+      return `
+        <div class="receipt cash-app">
+          <div class="receipt-status">
+            <div class="status-icon-container">
+              ${statusIcons['successful']}
+            </div>
+            <h3>You sent $${formData.amount || '3,000'}</h3>
+            <p>to ${formData.name || 'Jack William'}</p>
+          </div>
+          <div class="receipt-footer">
+            <button class="cash-app-button">Done</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateWellsFargoReceipt(formData, statusIcons, confirmationNumber, currentDate) {
+      const statusText = formData.status === 'successful' ? 'Your transaction has been made' : 
+                         formData.status === 'pending' ? 'Your transaction is pending' : 
+                         'Your transaction failed';
+      
+      return `
+        <div class="receipt wells-fargo">
+          <div class="wells-fargo-header">
+            <h2>WELLS FARGO</h2>
+          </div>
+          <div class="receipt-subheader">
+            <h3>Confirmation</h3>
+          </div>
+          <div class="receipt-status-box">
+            <div class="wells-fargo-icon">
+              ${statusIcons['successful']}
+            </div>
+            <div class="wells-fargo-status-text">
+              ${statusText} on ${currentDate} at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} Pacific Time.
+            </div>
+          </div>
+          <div class="receipt-details">
+            <div class="receipt-row">
+              <div class="receipt-label">From</div>
+              <div class="receipt-value">
+                <div>WAY2SAVE® SAVINGS</div>
+                <div>...${formData.accountNumber || '4954'}</div>
+                <div class="receipt-subtext">(Available balance $137.19)</div>
+              </div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">To</div>
+              <div class="receipt-value">
+                <div>${formData.name || 'CUSTOM MANAGEMENT(RM)'}</div>
+                <div>...${formData.accountNumber ? formData.accountNumber.slice(-4) : '2679'}</div>
+                <div class="receipt-subtext">(Available balance $2,150.51)</div>
+              </div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Frequency</div>
+              <div class="receipt-value">Once</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Send on</div>
+              <div class="receipt-value">${currentDate}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Amount</div>
+              <div class="receipt-value">$${formData.amount || '700.00'}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Confirmation</div>
+              <div class="receipt-value">${confirmationNumber}</div>
+            </div>
+          </div>
+          <div class="receipt-footer">
+            <p class="receipt-note">Transfer cannot be canceled.</p>
+            <p class="receipt-note">${formData.note || ''}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateBitcoinReceipt(formData, statusIcons) {
+      return `
+        <div class="receipt bitcoin">
+          <div class="receipt-status">
+            <div class="bitcoin-icon">
+              <svg viewBox="0 0 24 24" fill="#F7931A" width="48" height="48">
+                <path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.548v-.002zm-6.35-4.613c.24-1.59-.974-2.45-2.64-3.03l.54-2.153-1.315-.33-.525 2.107c-.345-.087-.705-.167-1.064-.25l.526-2.127-1.32-.33-.54 2.165c-.285-.067-.565-.132-.84-.2l-1.815-.45-.35 1.4s.975.225.955.236c.535.136.63.486.615.766l-1.477 5.92c-.075.166-.24.406-.614.314.015.02-.96-.24-.96-.24l-.66 1.51 1.71.426.93.242-.54 2.19 1.32.327.54-2.17c.36.1.705.19 1.05.273l-.51 2.154 1.32.33.545-2.19c2.24.427 3.93.257 4.64-1.774.57-1.637-.03-2.58-1.217-3.196.854-.193 1.5-.76 1.68-1.93h.01zm-3.01 4.22c-.404 1.64-3.157.75-4.05.53l.72-2.9c.896.23 3.757.67 3.33 2.37zm.41-4.24c-.37 1.49-2.662.735-3.405.55l.654-2.64c.744.18 3.137.524 2.75 2.084v.006z"/>
+              </svg>
+            </div>
+            <h3>${formData.amount || '0.01199328'} BTC Sent</h3>
+            <p>Your Bitcoin has been successfully sent.</p>
+            
+            ${formData.walletAddress ? `
+            <div class="wallet-address">
+              <span class="wallet-address-label">Recipient Wallet Address:</span>
+              ${formData.walletAddress}
+            </div>
+            ` : ''}
+          </div>
+          <div class="receipt-footer">
+            <button class="bitcoin-button">OK</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateCoinbaseReceipt(formData, statusIcons, confirmationNumber) {
+      const statusText = formData.status === 'successful' ? 'Success!' : 
+                         formData.status === 'pending' ? 'Pending' : 
+                         'Failed';
+      
+      const statusClass = formData.status === 'successful' ? 'status-success' : 
+                          formData.status === 'pending' ? 'status-pending' : 
+                          formData.status === 'failed' ? 'status-failed' : '';
+      
+      return `
+        <div class="receipt coinbase">
+          <div class="coinbase-header">
+            <div class="coinbase-logo">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <circle cx="12" cy="12" r="10" fill="#0052FF"/>
+                <path d="M12 17.5c-3.04 0-5.5-2.46-5.5-5.5s2.46-5.5 5.5-5.5 5.5 2.46 5.5 5.5-2.46 5.5-5.5 5.5zm0-9.5c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z" fill="white"/>
+              </svg>
+            </div>
+          </div>
+          <div class="receipt-status">
+            <h3 class="${statusClass}">${statusText}</h3>
+            <p>You're sending</p>
+            <h2>$${formData.amount || '36,900.00'}</h2>
+            
+            ${formData.walletAddress ? `
+            <div class="wallet-address">
+              <span class="wallet-address-label">Recipient Wallet Address:</span>
+              ${formData.walletAddress}
+            </div>
+            ` : ''}
+          </div>
+          <div class="receipt-details">
+            <p>Your Domestic Wire Transfer request to Coinbase Inc (****2815) is complete and will be reviewed for processing.</p>
+            <div class="receipt-row">
+              <div class="receipt-label">Reference Number:</div>
+              <div class="receipt-value">${confirmationNumber}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Recipient:</div>
+              <div class="receipt-value">${formData.name || 'Coinbase Inc'}</div>
+            </div>
+          </div>
+          <div class="receipt-footer">
+            <p class="receipt-note">Thank you for your request. Your transaction is still pending.</p>
+            <p class="receipt-note">${formData.note || 'All transactions are subject to routine review and approval before they can be released.'}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateMoneygramReceipt(formData, statusIcons, confirmationNumber, currentDate) {
+      return `
+        <div class="receipt moneygram">
+          <div class="receipt-header">
+            <div class="moneygram-logo">
+              <svg viewBox="0 0 200 50" width="150">
+                <path fill="#D22630" d="M30,25 C30,38.8 19.3,50 6,50 C2.7,50 0,47.3 0,44 L0,6 C0,2.7 2.7,0 6,0 C19.3,0 30,11.2 30,25 Z"/>
+                <path fill="white" d="M17.5,25 C17.5,18.1 11.9,12.5 5,12.5 L5,37.5 C11.9,37.5 17.5,31.9 17.5,25 Z"/>
+              </svg>
+            </div>
+            <h2>Money from ${formData.name || 'Elia'} is on the way!</h2>
+          </div>
+          <div class="receipt-details">
+            <div class="receipt-row">
+              <div class="receipt-label">REFERENCE NO.</div>
+              <div class="receipt-value">${confirmationNumber}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">SENT TO</div>
+              <div class="receipt-value">${formData.name || 'Elia Giselle Guity'}, Honduras</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">AMOUNT</div>
+              <div class="receipt-value">1,597.49 HNL</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">RECEIVE OPTION</div>
+              <div class="receipt-value">Bank Account •••• ${formData.accountNumber || '4196'}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">DATE PREPARED</div>
+              <div class="receipt-value">${currentDate} at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            </div>
+          </div>
+          <div class="receipt-footer">
+            <button class="moneygram-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                <polyline points="16 6 12 2 8 6"/>
+                <line x1="12" y1="2" x2="12" y2="15"/>
+              </svg>
+              Share and Save Receipt
+            </button>
+            <div class="moneygram-cost">
+              <div class="cost-row">
+                <div>Send Amount</div>
+                <div>$${formData.amount || '65.00'} USD</div>
+              </div>
+              <div class="cost-row">
+                <div>Fees</div>
+                <div>$1.99 USD</div>
+              </div>
+              <div class="cost-row total">
+                <div>Total Cost</div>
+                <div>$${(parseFloat(formData.amount || 65) + 1.99).toFixed(2)} USD</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateGCashReceipt(formData, statusIcons, confirmationNumber) {
+      return `
+        <div class="receipt gcash">
+          <div class="receipt-status">
+            <div class="status-icon-container">
+              ${statusIcons['successful']}
+            </div>
+          </div>
+          <div class="receipt-details gcash-details">
+            <div class="gcash-number">${confirmationNumber}</div>
+            <div class="gcash-method">Sent via GCash</div>
+            
+            <div class="receipt-row">
+              <div class="receipt-label">Amount</div>
+              <div class="receipt-value">₱${formData.amount || '1,000.00'}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Total Amount Sent</div>
+              <div class="receipt-value">₱${formData.amount || '1,000.00'}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Sender</div>
+              <div class="receipt-value">${formData.name || 'Might Binary'}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Ref No.</div>
+              <div class="receipt-value">${confirmationNumber}</div>
+            </div>
+          </div>
+          <div class="receipt-footer">
+            <button class="gcash-button">Return to Home</button>
+            <button class="gcash-button secondary">Send Money Again</button>
+            <p class="receipt-note">Redirecting to home in 3 seconds...</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function generatePayPalReceipt(formData, statusIcons) {
+      return `
+        <div class="receipt paypal">
+          <div class="receipt-header">
+            <div class="message-header">
+              <div class="message-app">MESSAGES</div>
+              <div class="message-time">now</div>
+            </div>
+            <div class="message-sender">david</div>
+            <div class="message-attachment">Attachment: 1 Image</div>
+          </div>
+          <div class="receipt-status">
+            <h3>You sent $${formData.amount || '3,500.00'} to ${formData.name || 'Leonora Rodriguez'}</h3>
+          </div>
+          <div class="receipt-details">
+            <div class="bank-logo">
+              <svg viewBox="0 0 124 33" width="150">
+                <path fill="#003087" d="M46.211 6.749h-6.839a.95.95 0 0 0-.939.802l-2.766 17.537a.57.57 0 0 0 .564.658h3.265a.95.95 0 0 0 .939-.803l.746-4.73a.95.95 0 0 1 .938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415-.97-1.142-2.694-1.746-4.985-1.746zM47 13.154c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583a.57.57 0 0 1 .563-.481h.473c1.235 0 2.4 0 3.002.704.359.42.469 1.044.332 1.906zM66.654 13.075h-3.275a.57.57 0 0 0-.563.481l-.145.916-.229-.332c-.709-1.029-2.29-1.373-3.868-1.373-3.619 0-6.71 2.741-7.312 6.586-.313 1.918.132 3.752 1.22 5.031.998 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .562.66h2.95a.95.95 0 0 0 .939-.803l1.77-11.209a.568.568 0 0 0-.561-.658zm-4.565 6.374c-.316 1.871-1.801 3.127-3.695 3.127-.951 0-1.711-.305-2.199-.883-.484-.574-.668-1.391-.514-2.301.295-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.499.589.697 1.411.554 2.317zM84.096 13.075h-3.291a.954.954 0 0 0-.787.417l-4.539 6.686-1.924-6.425a.953.953 0 0 0-.912-.678h-3.234a.57.57 0 0 0-.541.754l3.625 10.638-3.408 4.811a.57.57 0 0 0 .465.9h3.287a.949.949 0 0 0 .781-.408l10.946-15.8a.57.57 0 0 0-.468-.895z"/>
+                <path fill="#009cde" d="M94.992 6.749h-6.84a.95.95 0 0 0-.938.802l-2.766 17.537a.569.569 0 0 0 .562.658h3.51a.665.665 0 0 0 .656-.562l.785-4.971a.95.95 0 0 1 .938-.803h2.164c4.506 0 7.105-2.18 7.785-6.5.307-1.89.012-3.375-.873-4.415-.971-1.142-2.694-1.746-4.983-1.746zm.789 6.405c-.373 2.454-2.248 2.454-4.062 2.454h-1.031l.725-4.583a.568.568 0 0 1 .562-.481h.473c1.234 0 2.4 0 3.002.704.359.42.468 1.044.331 1.906zM115.434 13.075h-3.273a.567.567 0 0 0-.562.481l-.145.916-.23-.332c-.709-1.029-2.289-1.373-3.867-1.373-3.619 0-6.709 2.741-7.311 6.586-.312 1.918.131 3.752 1.219 5.031 1 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .564.66h2.949a.95.95 0 0 0 .938-.803l1.771-11.209a.571.571 0 0 0-.565-.658zm-4.565 6.374c-.314 1.871-1.801 3.127-3.695 3.127-.949 0-1.711-.305-2.199-.883-.484-.574-.666-1.391-.514-2.301.297-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.501.589.699 1.411.554 2.317zM119.295 7.23l-2.807 17.858a.569.569 0 0 0 .562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536a.57.57 0 0 0-.562-.659h-3.16a.571.571 0 0 0-.562.482z"/>
+                <path fill="#012169" d="M23.048 7.667c-.028.179-.06.362-.096.55-1.237 6.351-5.469 8.545-10.874 8.545H9.326c-.661 0-1.218.48-1.321 1.132L6.596 26.83l-.399 2.533a.704.704 0 0 0 .695.814h4.881c.578 0 1.069-.42 1.16-.99l.048-.248.919-5.832.059-.32c.09-.572.582-.992 1.16-.992h.73c4.729 0 8.431-1.92 9.513-7.476.452-2.321.218-4.259-.978-5.622a4.667 4.667 0 0 0-1.336-1.03z"/>
+                <path fill="#012169" d="M21.754 7.151a9.757 9.757 0 0 0-1.203-.267 15.284 15.284 0 0 0-2.426-.177h-7.352a1.172 1.172 0 0 0-1.159.992L8.05 17.605l-.045.289a1.336 1.336 0 0 1 1.321-1.132h2.752c5.405 0 9.637-2.195 10.874-8.545.037-.188.068-.371.096-.55a6.594 6.594 0 0 0-1.017-.429 9.045 9.045 0 0 0-.277-.087z"/>
+              </svg>
+            </div>
+            <div class="paypal-message">
+              <h3>You sent $${formData.amount || '3,500.00'} to ${formData.name || 'Leonora Rodriguez'}</h3>
+              <p>sent from account ending in 5789 to ${formData.accountNumber || '409.313.4494'}</p>
+            </div>
+            <button class="paypal-button">View balance</button>
+            <div class="paypal-confirmation">Confirmation: ${Math.random().toString(36).substring(2, 10)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateZelleReceipt(formData, statusIcons) {
+      // Different icons and messages based on status
+      let statusIcon, statusMessage;
+      
+      if (formData.status === 'successful') {
+        statusIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00A650" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>`;
+        statusMessage = `Your payment of $${formData.amount || '2,000.00'} to ${formData.name || 'TYREE'} was sent.`;
+      } else if (formData.status === 'pending') {
+        statusIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>`;
+        statusMessage = `We haven't processed your payment yet. Please check back later to confirm when ${formData.name || 'TYREE'} will receive your money.`;
+      } else {
+        statusIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>`;
+        statusMessage = `Your payment of $${formData.amount || '2,000.00'} to ${formData.name || 'TYREE'} was rejected.`;
+      }
+      
+      return `
+        <div class="receipt zelle">
+          <div class="warning-icon ${formData.status === 'successful' ? 'success-icon' : formData.status === 'pending' ? 'pending-icon' : 'rejected-icon'}">
+            ${statusIcon}
+          </div>
+          
+          <div class="receipt-message">
+            <h2>${statusMessage}</h2>
+          </div>
+          
+          <div class="receipt-amount">
+            $${formData.amount || '2,000.00'}
+          </div>
+          
+          <div class="recipient-avatar">
+            <span class="initial">${formData.name ? formData.name.charAt(0).toUpperCase() : 'T'}</span>
+            <div class="zelle-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="16" height="16">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+          </div>
+          
+          <div class="recipient-info">
+            ${formData.status === 'successful' ? 'Payment completed successfully.' : formData.status === 'pending' ? 'We added ' + (formData.name || 'TYREE') + ' to your recipients list.' : 'Payment was not processed.'}
+            <br>
+            <a href="#" class="edit-link">
+              ${formData.status === 'rejected' ? 'Try again' : 'Edit the recipient details'}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+          
+          <div class="siri-tip">
+            Add a Siri shortcut, such as "Pay ${formData.name || 'TYREE'}," to save time when sending money.
+            
+            <div class="siri-button">
+              <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzOCAzOCI+PHBhdGggZD0iTTE5IDJDOSAyIDEgMTAgMSAyMHM4IDE4IDE4IDE4IDE4LTggMTgtMThTMjkgMiAxOSAyeiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xOSAyQzkgMiAxIDEwIDEgMjBzOCAxOCAxOCAxOCAxOC04IDE4LTE4UzI5IDIgMTkgMnoiIGZpbGw9InVybCgjYSkiLz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImEiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMzggMCAwIDM4IDE5IDIwKSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmU1MjJmIi8+PHN0b3Agb2Zmc2V0PSIuMSIgc3RvcC1jb2xvcj0iI2ZlNTIyZiIvPjxzdG9wIG9mZnNldD0iLjIiIHN0b3AtY29sb3I9IiNmZDZiMmQiLz48c3RvcCBvZmZzZXQ9Ii4zIiBzdG9wLWNvbG9yPSIjZmM4MzJjIi8+PHN0b3Agb2Zmc2V0PSIuNCIgc3RvcC1jb2xvcj0iI2ZjOWIyYSIvPjxzdG9wIG9mZnNldD0iLjUiIHN0b3AtY29sb3I9IiNmYmIyMjgiLz48c3RvcCBvZmZzZXQ9Ii42IiBzdG9wLWNvbG9yPSIjZGZjOTJhIi8+PHN0b3Agb2Zmc2V0PSIuNyIgc3RvcC1jb2xvcj0iI2MzZGYyYyIvPjxzdG9wIG9mZnNldD0iLjgiIHN0b3AtY29sb3I9IiM1OWYxN2YiLz48c3RvcCBvZmZzZXQ9Ii45IiBzdG9wLWNvbG9yPSIjMGZiZGQ0Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGY3OGQ0Ii8+PC9yYWRpYWxHcmFkaWVudD48L2RlZnM+PC9zdmc+" alt="Siri logo" width="30" height="30">
+          <span>Add to Siri</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+    function generateCitiReceipt(formData, statusIcons, confirmationNumber) {
+      return `
+            <div class="receipt citi">
+      <div class="success-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#056dae" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      
+      <div class="receipt-title">Success!</div>
+      
+      <div class="receipt-subtitle">
+        You're sending
+      </div>
+      
+      <div class="receipt-amount">
+        $${formData.amount || '36,900.00'}
+      </div>
+          
+          <div class="receipt-details">
+            <p>Your Domestic Wire Transfer request to ${formData.name || 'Coinbase Inc'} (****${formData.accountNumber ? formData.accountNumber.slice(-4) : '2815'}) is complete and will be reviewed for processing.</p>
+            
+            <div class="receipt-row">
+              <div class="receipt-label">Reference Number:</div>
+              <div class="receipt-value">${confirmationNumber}</div>
+            </div>
+          </div>
+          
+                <div class="citi-logo-container">
+        <img src="citi.png" alt="Citi" class="citi-logo">
+      </div>
+          
+          <div class="receipt-note">
+            Thank you for your request. Your transaction is in progress
+          </div>
+          
+          <div class="receipt-disclaimer">
+            All transactions are subject to routine review and approval before they can be released. No further action is required from you at this time. Should we require more information in order to approve the transfer, we will contact you by telephone. If we are unable to reach you, or if your transaction cannot be approved for other reasons, we will notify you.
+            <br><br>
+            This review is expected to be completed by the end of the next business day.
+            <br><br>
+            If approved, these are the transaction details that will apply to your transfer once reviewed and processed.
+          </div>
+        </div>
+      `;
+    }
+
+    function generateGenericReceipt(formData, statusIcons, confirmationNumber, currentDate) {
+      const statusText = formData.status === 'successful' ? 'Successfully sent' : 
+                         formData.status === 'pending' ? 'Pending' : 
+                         'Failed';
+      
+      const statusClass = formData.status === 'successful' ? 'status-success' : 
+                          formData.status === 'pending' ? 'status-pending' : 
+                          'status-failed';
+      
+      return `
+        <div class="receipt generic">
+          <div class="receipt-status ${statusClass}">
+            <div class="status-icon-container">
+              ${statusIcons[formData.status]}
+            </div>
+            <h3>${statusText}</h3>
+            <p>$${formData.amount || '100.00'}</p>
+          </div>
+          <div class="receipt-details">
+            <div class="receipt-row">
+              <div class="receipt-label">To</div>
+              <div class="receipt-value">${formData.name || 'Recipient'}</div>
+            </div>
+            ${formData.accountNumber ? `
+            <div class="receipt-row">
+              <div class="receipt-label">Account</div>
+              <div class="receipt-value">•••• ${formData.accountNumber.slice(-4)}</div>
+            </div>
+            ` : ''}
+            ${formData.walletAddress ? `
+            <div class="receipt-row">
+              <div class="receipt-label">Wallet</div>
+              <div class="receipt-value">${formData.walletAddress}</div>
+            </div>
+            ` : ''}
+            <div class="receipt-row">
+              <div class="receipt-label">Amount</div>
+              <div class="receipt-value">$${formData.amount || '100.00'}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Date</div>
+              <div class="receipt-value">${currentDate}</div>
+            </div>
+            <div class="receipt-row">
+              <div class="receipt-label">Confirmation #</div>
+              <div class="receipt-value">${confirmationNumber}</div>
+            </div>
+          </div>
+          <div class="receipt-footer">
+            <p class="receipt-note">${formData.note || ''}</p>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
