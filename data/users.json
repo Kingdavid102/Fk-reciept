@@ -1,0 +1,17 @@
+{
+  "users": [
+    {
+      "id": "user_001",
+      "username": "testuser",
+      "email": "test@example.com",
+      "password": "password123",
+      "isPremium": true,
+      "premiumExpiry": "2025-07-26T22:02:25.895Z",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "receiptsGenerated": 0,
+      "profilePhoto": null,
+      "subscriptionDaysLeft": 1,
+      "isActive": true
+    }
+  ]
+}
