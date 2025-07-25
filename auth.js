@@ -1,43 +1,46 @@
+// Auth page functionality
 document.addEventListener("DOMContentLoaded", () => {
+  const tabBtns = document.querySelectorAll(".tab-btn")
+  const authForms = document.querySelectorAll(".auth-form")
   const loginForm = document.getElementById("loginForm")
   const signupForm = document.getElementById("signupForm")
+  const adminModal = document.getElementById("adminModal")
+  const adminLoginBtn = document.getElementById("adminLoginBtn")
   const adminForm = document.getElementById("adminForm")
-  const showSignupBtn = document.getElementById("showSignup")
-  const showLoginBtn = document.getElementById("showLogin")
-  const showAdminBtn = document.getElementById("showAdmin")
-  const backToLoginBtn = document.getElementById("backToLogin")
+  const modalCloses = document.querySelectorAll(".modal-close")
 
-  // Form switching
-  showSignupBtn?.addEventListener("click", (e) => {
-    e.preventDefault()
-    document.getElementById("loginSection").classList.add("hidden")
-    document.getElementById("signupSection").classList.remove("hidden")
+  // Check URL parameters for mode
+  const urlParams = new URLSearchParams(window.location.search)
+  const mode = urlParams.get("mode")
+  if (mode === "signup") {
+    switchTab("signup")
+  }
+
+  // Tab switching
+  tabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab
+      switchTab(tab)
+    })
   })
 
-  showLoginBtn?.addEventListener("click", (e) => {
-    e.preventDefault()
-    document.getElementById("signupSection").classList.add("hidden")
-    document.getElementById("loginSection").classList.remove("hidden")
-  })
-
-  showAdminBtn?.addEventListener("click", (e) => {
-    e.preventDefault()
-    document.getElementById("loginSection").classList.add("hidden")
-    document.getElementById("adminSection").classList.remove("hidden")
-  })
-
-  backToLoginBtn?.addEventListener("click", (e) => {
-    e.preventDefault()
-    document.getElementById("adminSection").classList.add("hidden")
-    document.getElementById("loginSection").classList.remove("hidden")
-  })
+  function switchTab(tab) {
+    tabBtns.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tab === tab)
+    })
+    authForms.forEach((form) => {
+      form.classList.toggle("active", form.id === `${tab}-form`)
+    })
+  }
 
   // Login form
-  loginForm?.addEventListener("submit", async (e) => {
+  loginForm.addEventListener("submit", async (e) => {
     e.preventDefault()
-    const formData = new FormData(e.target)
-    const email = formData.get("email")
-    const password = formData.get("password")
+    const formData = new FormData(loginForm)
+    const data = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    }
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -45,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(data),
       })
 
       const result = await response.json()
@@ -66,11 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
   })
 
   // Signup form
-  signupForm?.addEventListener("submit", async (e) => {
+  signupForm.addEventListener("submit", async (e) => {
     e.preventDefault()
-    const formData = new FormData(e.target)
-    const username = formData.get("username")
-    const email = formData.get("email")
+    const formData = new FormData(signupForm)
     const password = formData.get("password")
     const confirmPassword = formData.get("confirmPassword")
 
@@ -79,13 +80,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return
     }
 
+    const data = {
+      username: formData.get("username"),
+      email: formData.get("email"),
+      password: password,
+    }
+
     try {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify(data),
       })
 
       const result = await response.json()
@@ -105,12 +112,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Admin form
-  adminForm?.addEventListener("submit", async (e) => {
+  // Admin login
+  adminLoginBtn.addEventListener("click", () => {
+    adminModal.classList.remove("hidden")
+  })
+
+  adminForm.addEventListener("submit", async (e) => {
     e.preventDefault()
-    const formData = new FormData(e.target)
-    const email = formData.get("email")
-    const password = formData.get("password")
+    const formData = new FormData(adminForm)
+    const data = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    }
 
     try {
       const response = await fetch("/api/auth/admin", {
@@ -118,14 +131,14 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(data),
       })
 
       const result = await response.json()
 
-      if (response.ok && result.isAdmin) {
+      if (response.ok) {
         localStorage.setItem("isAdmin", "true")
-        showNotification("Admin login successful!", "success")
+        showNotification("Admin access granted!", "success")
         setTimeout(() => {
           window.location.href = "/admin"
         }, 1000)
@@ -138,15 +151,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
+  // Modal close handlers
+  modalCloses.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      adminModal.classList.add("hidden")
+    })
+  })
+
+  adminModal.addEventListener("click", (e) => {
+    if (e.target === adminModal) {
+      adminModal.classList.add("hidden")
+    }
+  })
+
+  // Notification system
   function showNotification(message, type = "info") {
     const notification = document.getElementById("notification")
-    if (notification) {
-      notification.textContent = message
-      notification.className = `notification ${type} show`
+    notification.textContent = message
+    notification.className = `notification ${type} show`
 
-      setTimeout(() => {
-        notification.classList.remove("show")
-      }, 3000)
-    }
+    setTimeout(() => {
+      notification.classList.remove("show")
+    }, 3000)
   }
 })
