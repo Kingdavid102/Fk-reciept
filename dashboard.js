@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateUserInterface(updatedUser)
         updateProfilePage(updatedUser)
         updateSubscriptionPage(updatedUser)
+        loadUserReceipts()
       }
     } catch (error) {
       console.error("Error updating user info:", error)
@@ -355,6 +356,82 @@ document.addEventListener("DOMContentLoaded", () => {
       notification.classList.remove("show")
     }, 3000)
   }
+
+  async function loadUserReceipts() {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"))
+      if (!user) return
+
+      const response = await fetch(`/api/user/${user.id}/receipts`)
+      const result = await response.json()
+
+      if (response.ok) {
+        displayUserReceipts(result.receipts)
+      }
+    } catch (error) {
+      console.error("Error loading receipts:", error)
+    }
+  }
+
+  function displayUserReceipts(receipts) {
+    // Create or update receipts section
+    let receiptsSection = document.getElementById("user-receipts-section")
+    if (!receiptsSection) {
+      receiptsSection = document.createElement("div")
+      receiptsSection.id = "user-receipts-section"
+      receiptsSection.className = "user-receipts-section"
+
+      // Insert after receipt types section
+      const receiptTypesSection = document.querySelector(".receipt-types-section")
+      receiptTypesSection.parentNode.insertBefore(receiptsSection, receiptTypesSection.nextSibling)
+    }
+
+    if (receipts.length === 0) {
+      receiptsSection.innerHTML = ""
+      return
+    }
+
+    receiptsSection.innerHTML = `
+      <h2>Your Recent Receipts</h2>
+      <div class="user-receipts-grid" id="userReceiptsGrid">
+        ${receipts
+          .map(
+            (receipt) => `
+          <div class="user-receipt-card" data-receipt-id="${receipt.id}">
+            <div class="receipt-card-header">
+              <div class="receipt-icon">
+                ${receipt.receiptType.icon}
+              </div>
+              <div>
+                <h3>${receipt.receiptType.name}</h3>
+                <p>Amount: $${receipt.formData.amount}</p>
+                <p class="receipt-date">${new Date(receipt.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div class="receipt-actions">
+              <a href="${receipt.link}" target="_blank" class="btn-primary btn-sm">View</a>
+              <button class="btn-secondary btn-sm copy-receipt-link" data-link="${window.location.origin}${receipt.link}">Copy Link</button>
+            </div>
+          </div>
+        `,
+          )
+          .join("")}
+      </div>
+    `
+
+    // Add event listeners for copy buttons
+    document.querySelectorAll(".copy-receipt-link").forEach((button) => {
+      button.addEventListener("click", function () {
+        const link = this.dataset.link
+        navigator.clipboard.writeText(link).then(() => {
+          this.textContent = "Copied!"
+          setTimeout(() => {
+            this.textContent = "Copy Link"
+          }, 2000)
+        })
+      })
+    })
+  }
 })
 
 // Receipt types configuration
@@ -458,3 +535,84 @@ const receiptTypes = [
     requiresWalletAddress: false,
   },
 ]
+
+// Add this CSS to the existing styles by creating a style element
+const receiptStyles = document.createElement("style")
+receiptStyles.textContent = `
+  .user-receipts-section {
+    margin-top: 3rem;
+  }
+  
+  .user-receipts-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 1.5rem;
+  }
+  
+  .user-receipts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .user-receipt-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s;
+  }
+  
+  .user-receipt-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .receipt-date {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+  }
+  
+  .receipt-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary.btn-sm {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+  }
+  
+  .btn-secondary.btn-sm {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e5e7eb;
+  }
+  
+  @media (max-width: 768px) {
+    .user-receipts-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .receipt-actions {
+      flex-direction: column;
+    }
+  }
+`
+document.head.appendChild(receiptStyles)

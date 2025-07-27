@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .receipt-content {
+            padding: 30px;
+            background: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc2626;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .actions {
+            padding: 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 Receipt Viewer</h1>
+        </div>
+        
+        <div id="receiptContent" class="receipt-content">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading receipt...</p>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn btn-primary" onclick="printReceipt()">
+                🖨️ Print
+            </button>
+            <button class="btn btn-secondary" onclick="downloadReceipt()">
+                💾 Download
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const receiptId = window.location.pathname.split('/').pop();
+            
+            if (!receiptId) {
+                showError('Invalid receipt link');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/receipt/${receiptId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Receipt not found');
+                }
+
+                const result = await response.json();
+                displayReceipt(result.receipt);
+            } catch (error) {
+                console.error('Error loading receipt:', error);
+                showError('Receipt not found or has expired');
+            }
+        });
+
+        function displayReceipt(receipt) {
+            const receiptContent = document.getElementById('receiptContent');
+            const receiptHTML = generateReceiptHTML(receipt.data);
+            receiptContent.innerHTML = receiptHTML;
+        }
+
+        function showError(message) {
+            const receiptContent = document.getElementById('receiptContent');
+            receiptContent.innerHTML = `
+                <div class="error">
+                    <div class="error-icon">❌</div>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function generateReceiptHTML(formData) {
+            const { receiptType } = formData;
+            const confirmationNumber = generateConfirmationNumber();
+            const currentDate = new Date().toLocaleDateString();
+
+            switch (receiptType.id) {
+                case "paypal":
+                    return generatePayPalReceipt(formData, confirmationNumber);
+                case "zelle":
+                    return generateZelleReceipt(formData, confirmationNumber);
+                case "bank-of-america":
+                    return generateBankOfAmericaReceipt(formData, confirmationNumber);
+                case "citi":
+                    return generateCitiReceipt(formData, confirmationNumber);
+                case "cash-app":
+                    return generateCashAppReceipt(formData, confirmationNumber);
+                case "bitcoin":
+                    return generateBitcoinReceipt(formData, confirmationNumber);
+                case "coinbase":
+                    return generateCoinbaseReceipt(formData, confirmationNumber);
+                case "gcash":
+                    return generateGCashReceipt(formData, confirmationNumber);
+                case "moneygram":
+                    return generateMoneygramReceipt(formData, confirmationNumber, currentDate);
+                case "wells-fargo":
+                    return generateWellsFargoReceipt(formData, confirmationNumber, currentDate);
+                case "credit-card":
+                    return generateCreditCardReceipt(formData, confirmationNumber);
+                default:
+                    return generateGenericReceipt(formData, confirmationNumber, currentDate);
+            }
+        }
+
+        function generatePayPalReceipt(formData, confirmationNumber) {
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="margin-bottom: 20px;">
+                        <svg viewBox="0 0 124 33" width="100" style="fill: #003087;">
+                            <path d="M46.211 6.749h-6.839a.95.95 0 0 0-.939.802l-2.766 17.537a.57.57 0 0 0 .564.658h3.265a.95.95 0 0 0 .939-.803l.746-4.73a.95.95 0 0 1 .938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415-.97-1.142-2.694-1.746-4.985-1.746z"/>
+                        </svg>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0; color: #1a1a1a;">You sent $${formData.amount} to ${formData.recipientName}</h3>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">sent from account ending in ${formData.accountNumber ? formData.accountNumber.slice(-4) : "5789"}</span>
+                        </div>
+                        <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">to ${formData.recipientName.split("@")[0] || formData.recipientName}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Confirmation:</span>
+                            <span style="font-weight: 600;">${confirmationNumber.toLowerCase()}</span>
+                        </div>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <button style="background: #0070ba; color: white; border: none; padding: 12px 24px; border-radius: 4px; margin-right: 10px; font-weight: 600;">View balance</button>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateZelleReceipt(formData, confirmationNumber) {
+            let statusMessage = "";
+            if (formData.status === "successful") {
+                statusMessage = `Your payment of $${formData.amount} to ${formData.recipientName} was sent.`;
+            } else if (formData.status === "pending") {
+                statusMessage = `We haven't processed your payment yet. Please check back later to confirm when ${formData.recipientName} will receive your money.`;
+            } else {
+                statusMessage = `Your payment of $${formData.amount} to ${formData.recipientName} was rejected.`;
+            }
+
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="width: 60px; height: 60px; background: ${formData.status === "successful" ? "#dcfce7" : formData.status === "pending" ? "#fef3c7" : "#fef2f2"}; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: ${formData.status === "successful" ? "#16a34a" : formData.status === "pending" ? "#d97706" : "#dc2626"};">
+                        ${formData.status === "successful" ? "✓" : formData.status === "pending" ? "⏱" : "✗"}
+                    </div>
+                    <h3 style="margin: 15px 0; font-size: 1.1rem; color: #1a1a1a;">
+                        ${statusMessage}
+                    </h3>
+                    <div style="font-size: 2rem; font-weight: bold; margin: 15px 0; color: #1a1a1a;">$${formData.amount}</div>
+                    <div style="margin: 20px 0;">
+                        <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: #666;">
+                            ${formData.recipientName.charAt(0).toUpperCase()}
+                        </div>
+                        <div style="font-weight: 500; color: #1a1a1a;">${formData.recipientName}</div>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateBankOfAmericaReceipt(formData, confirmationNumber) {
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="margin-bottom: 20px;">
+                        <img src="emmy.png" alt="Bank of America" style="max-width: 150px; height: auto;">
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <div style="width: 80px; height: 80px; background: #e8f5e8; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+                            <img src="thumb.png" alt="Success" style="width: 40px; height: 40px;">
+                        </div>
+                    </div>
+                    <h3 style="margin: 15px 0; color: #1a1a1a;">
+                        You sent $${formData.amount} to ${formData.recipientName}
+                    </h3>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">From Account:</span>
+                            <span style="font-weight: 600;">****${formData.accountNumber ? formData.accountNumber.slice(-4) : "5789"}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Confirmation:</span>
+                            <span style="font-weight: 600;">${confirmationNumber.toLowerCase()}</span>
+                        </div>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateCitiReceipt(formData, confirmationNumber) {
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="width: 60px; height: 60px; background: #dcfce7; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #16a34a;">
+                        ✓
+                    </div>
+                    <h2 style="margin: 15px 0; color: #056dae; font-size: 1.5rem;">Success!</h2>
+                    <p style="color: #666; margin-bottom: 10px;">You're sending</p>
+                    <div style="font-size: 2rem; font-weight: bold; margin: 15px 0; color: #056dae;">$${formData.amount}</div>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Reference Number:</span>
+                            <span style="font-weight: 600;">${confirmationNumber}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Recipient:</span>
+                            <span style="font-weight: 600;">${formData.recipientName}</span>
+                        </div>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <img src="citi.png" alt="Citi" style="max-width: 100px; height: auto;">
+                    </div>
+                    <p style="font-size: 0.875rem; color: #666; margin-top: 15px;">
+                        Your transaction is in progress and will be reviewed for processing.
+                    </p>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateCashAppReceipt(formData, confirmationNumber) {
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="width: 60px; height: 60px; background: #dcfce7; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #16a34a;">
+                        ✓
+                    </div>
+                    <h3 style="margin: 15px 0; color: #1a1a1a;">
+                        You sent $${formData.amount}
+                    </h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        to ${formData.recipientName}
+                    </p>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateBitcoinReceipt(formData, confirmationNumber) {
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="margin-bottom: 20px;">
+                        <svg viewBox="0 0 24 24" fill="#F7931A" width="48" height="48">
+                            <path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.548v-.002z"/>
+                        </svg>
+                    </div>
+                    <h3 style="margin: 15px 0; color: #1a1a1a;">
+                        ${formData.amount} BTC Sent
+                    </h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Your Bitcoin has been successfully sent.
+                    </p>
+                    ${formData.walletAddress ? `
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Wallet Address:</span>
+                            <span style="font-weight: 600; word-break: break-all; font-size: 0.75rem;">${formData.walletAddress}</span>
+                        </div>
+                    </div>
+                    ` : ""}
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateCoinbaseReceipt(formData, confirmationNumber) {
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="margin-bottom: 20px;">
+                        <svg viewBox="0 0 24 24" width="32" height="32">
+                            <circle cx="12" cy="12" r="10" fill="#0052FF"/>
+                            <path d="M12 17.5c-3.04 0-5.5-2.46-5.5-5.5s2.46-5.5 5.5-5.5 5.5 2.46 5.5 5.5-2.46 5.5-5.5 5.5z" fill="white"/>
+                        </svg>
+                    </div>
+                    <h3 style="margin: 15px 0; color: #1a1a1a; text-transform: capitalize;">
+                        ${formData.status}!
+                    </h3>
+                    <p style="color: #666; margin-bottom: 10px;">You're sending</p>
+                    <div style="font-size: 2rem; font-weight: bold; margin: 15px 0; color: #1a1a1a;">$${formData.amount}</div>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Reference Number:</span>
+                            <span style="font-weight: 600;">${confirmationNumber}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Recipient:</span>
+                            <span style="font-weight: 600;">${formData.recipientName}</span>
+                        </div>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateGCashReceipt(formData, confirmationNumber) {
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="width: 60px; height: 60px; background: #dcfce7; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #16a34a;">
+                        ✓
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: #1a1a1a; margin-bottom: 5px;">
+                            ${confirmationNumber}
+                        </div>
+                        <div style="color: #666; font-size: 0.875rem;">Sent via GCash</div>
+                    </div>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Amount:</span>
+                            <span style="font-weight: 600;">₱${formData.amount}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Sender:</span>
+                            <span style="font-weight: 600;">${formData.recipientName}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Ref No.:</span>
+                            <span style="font-weight: 600;">${confirmationNumber}</span>
+                        </div>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateMoneygramReceipt(formData, confirmationNumber, currentDate) {
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <h3 style="margin: 15px 0; color: #1a1a1a;">
+                        Money from ${formData.recipientName} is on the way!
+                    </h3>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">REFERENCE NO.:</span>
+                            <span style="font-weight: 600;">${confirmationNumber}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">SENT TO:</span>
+                            <span style="font-weight: 600;">${formData.recipientName}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">AMOUNT:</span>
+                            <span style="font-weight: 600;">$${formData.amount}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">DATE:</span>
+                            <span style="font-weight: 600;">${currentDate}</span>
+                        </div>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateWellsFargoReceipt(formData, confirmationNumber, currentDate) {
+            const statusText = formData.status === "successful" ? "Your transaction has been made" : formData.status === "pending" ? "Your transaction is pending" : "Your transaction failed";
+
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <h2 style="margin: 15px 0; color: #d71e2b; font-size: 1.25rem;">WELLS FARGO</h2>
+                    <h3 style="margin: 15px 0; color: #1a1a1a;">Confirmation</h3>
+                    <div style="width: 60px; height: 60px; background: #dcfce7; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #16a34a;">
+                        ✓
+                    </div>
+                    <p style="color: #666; margin: 15px 0;">
+                        ${statusText} on ${currentDate}
+                    </p>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">From:</span>
+                            <span style="font-weight: 600;">****${formData.accountNumber ? formData.accountNumber.slice(-4) : "4954"}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">To:</span>
+                            <span style="font-weight: 600;">${formData.recipientName}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Amount:</span>
+                            <span style="font-weight: 600;">$${formData.amount}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Confirmation:</span>
+                            <span style="font-weight: 600;">${confirmationNumber}</span>
+                        </div>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateCreditCardReceipt(formData, confirmationNumber) {
+            const statusText = formData.status === "successful" ? "Payment Successful" : formData.status === "pending" ? "Payment Pending" : "Payment Failed";
+
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <h3 style="margin: 0 0 10px 0; color: #1a1a1a;">${statusText}</h3>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin: 15px 0; color: #1a1a1a;">
+                        $${formData.amount}
+                    </div>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">To:</span>
+                            <span style="font-weight: 600;">${formData.recipientName}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Transaction ID:</span>
+                            <span style="font-weight: 600;">${confirmationNumber}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Card:</span>
+                            <span style="font-weight: 600;">****${formData.accountNumber.slice(-4)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Merchant:</span>
+                            <span style="font-weight: 600;">${formData.recipientName}</span>
+                        </div>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateGenericReceipt(formData, confirmationNumber, currentDate) {
+            const statusText = formData.status === "successful" ? "Successfully sent" : formData.status === "pending" ? "Pending" : "Failed";
+
+            return `
+                <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="width: 60px; height: 60px; background: ${formData.status === "successful" ? "#dcfce7" : formData.status === "pending" ? "#fef3c7" : "#fef2f2"}; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: ${formData.status === "successful" ? "#16a34a" : formData.status === "pending" ? "#d97706" : "#dc2626"};">
+                        ${formData.status === "successful" ? "✓" : formData.status === "pending" ? "⏱" : "✗"}
+                    </div>
+                    <h3 style="margin: 15px 0; color: #1a1a1a; text-transform: capitalize;">
+                        ${statusText}
+                    </h3>
+                    <div style="font-size: 2rem; font-weight: bold; margin: 15px 0; color: #1a1a1a;">$${formData.amount}</div>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">To:</span>
+                            <span style="font-weight: 600;">${formData.recipientName}</span>
+                        </div>
+                        ${formData.accountNumber ? `
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Account:</span>
+                            <span style="font-weight: 600;">•••• ${formData.accountNumber.slice(-4)}</span>
+                        </div>
+                        ` : ""}
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Date:</span>
+                            <span style="font-weight: 600;">${currentDate}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">Confirmation #:</span>
+                            <span style="font-weight: 600;">${confirmationNumber}</span>
+                        </div>
+                    </div>
+                    ${formData.note ? `<div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.875rem; color: #666;">${formData.note}</div>` : ""}
+                </div>
+            `;
+        }
+
+        function generateConfirmationNumber() {
+            return Math.random().toString(36).substring(2, 10).toLowerCase();
+        }
+
+        function printReceipt() {
+            window.print();
+        }
+
+        function downloadReceipt() {
+            const receiptContent = document.getElementById('receiptContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Receipt Download</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 0;
+                            padding: 20px;
+                            background: white;
+                        }
+                        .receipt-content {
+                            max-width: 400px;
+                            margin: 0 auto;
+                            padding: 20px;
+                            border: 2px solid #4f46e5;
+                            border-radius: 8px;
+                            background: white;
+                        }
+                        @media print {
+                            body { margin: 0; }
+                            .receipt-content { border: none; box-shadow: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-content">
+                        ${receiptContent}
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            window.onafterprint = function() {
+                                window.close();
+                            }
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+        }
+    </script>
+</body>
+</html>

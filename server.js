@@ -81,6 +81,26 @@ const calculateDaysLeft = (premiumExpiry) => {
   return Math.max(0, diffDays)
 }
 
+const readReceipts = async () => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, "data", "receipts.json"), "utf8")
+    return JSON.parse(data)
+  } catch (error) {
+    return { receipts: [] }
+  }
+}
+
+const writeReceipts = async (data) => {
+  try {
+    await fs.mkdir(path.join(__dirname, "data"), { recursive: true })
+    await fs.writeFile(path.join(__dirname, "data", "receipts.json"), JSON.stringify(data, null, 2))
+    return true
+  } catch (error) {
+    console.error("Error writing receipts:", error)
+    return false
+  }
+}
+
 // Initialize
 ensureUploadsDir()
 
@@ -442,7 +462,7 @@ app.post("/api/admin/users/:userId/ban", async (req, res) => {
 
 app.post("/api/receipts/generate", async (req, res) => {
   try {
-    const { userId } = req.body
+    const { userId, receiptData, receiptHtml } = req.body
 
     if (!userId) {
       return res.status(400).json({ error: "User ID is required" })
@@ -466,11 +486,34 @@ app.post("/api/receipts/generate", async (req, res) => {
       return res.status(403).json({ error: "Premium subscription required to generate receipts" })
     }
 
+    // Generate unique receipt ID
+    const receiptId = "receipt_" + Math.random().toString(36).substr(2, 9)
+
+    // Save receipt to receipts.json
+    const receiptsData = await readReceipts()
+    const newReceipt = {
+      id: receiptId,
+      userId: userId,
+      receiptType: receiptData.receiptType,
+      formData: receiptData,
+      html: receiptHtml,
+      createdAt: new Date().toISOString(),
+      link: `/receipt/${receiptId}`,
+    }
+
+    receiptsData.receipts.push(newReceipt)
+    await writeReceipts(receiptsData)
+
     // Increment receipt count
     user.receiptsGenerated = (user.receiptsGenerated || 0) + 1
     await writeUsers(data)
 
-    res.json({ success: true, receiptsGenerated: user.receiptsGenerated })
+    res.json({
+      success: true,
+      receiptsGenerated: user.receiptsGenerated,
+      receiptId: receiptId,
+      receiptLink: `/receipt/${receiptId}`,
+    })
   } catch (error) {
     console.error("Generate receipt error:", error)
     res.status(500).json({ error: "Internal server error" })
@@ -503,6 +546,93 @@ app.get("/api/user/:userId", async (req, res) => {
   } catch (error) {
     console.error("Get user error:", error)
     res.status(500).json({ error: "Internal server error" })
+  }
+})
+
+app.get("/api/user/:userId/receipts", async (req, res) => {
+  try {
+    const { userId } = req.params
+    const receiptsData = await readReceipts()
+
+    // Filter receipts for this user
+    const userReceipts = receiptsData.receipts
+      .filter((receipt) => receipt.userId === userId)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+
+    res.json({ receipts: userReceipts })
+  } catch (error) {
+    console.error("Get user receipts error:", error)
+    res.status(500).json({ error: "Internal server error" })
+  }
+})
+
+app.get("/receipt/:id", async (req, res) => {
+  try {
+    const { id } = req.params
+    const receiptsData = await readReceipts()
+    const receipt = receiptsData.receipts.find((r) => r.id === id)
+
+    if (!receipt) {
+      return res.status(404).send("Receipt not found")
+    }
+
+    // Read the CSS file to include the same styles
+    const cssContent = await fs.readFile(path.join(__dirname, "styless.css"), "utf8")
+
+    // Return HTML page that displays the receipt with the exact same styling
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Receipt - ${receipt.receiptType.name}</title>
+        <style>
+          ${cssContent}
+          
+          /* Additional styles for the receipt display */
+          body {
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          
+          .receipt-display-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+          }
+          
+          /* Ensure images work properly */
+          img {
+            max-width: 100%;
+            height: auto;
+          }
+          
+          /* Mobile responsiveness */
+          @media (max-width: 480px) {
+            .receipt-display-container {
+              margin: 10px;
+              max-width: calc(100vw - 20px);
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="receipt-display-container">
+          ${receipt.html}
+        </div>
+      </body>
+      </html>
+    `)
+  } catch (error) {
+    console.error("Get receipt error:", error)
+    res.status(500).send("Internal server error")
   }
 })
 

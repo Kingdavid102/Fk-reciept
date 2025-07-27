@@ -96,14 +96,21 @@ document.addEventListener("DOMContentLoaded", () => {
   async function generateReceipt(e) {
     e.preventDefault()
 
+    const formData = getFormData()
+    const receiptHTML = generateReceiptHTML(formData)
+
     try {
-      // Call API to increment receipt count
+      // Call API to save receipt and increment count
       const response = await fetch("/api/receipts/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({
+          userId: user.id,
+          receiptData: formData,
+          receiptHtml: receiptHTML,
+        }),
       })
 
       if (response.ok) {
@@ -114,9 +121,34 @@ document.addEventListener("DOMContentLoaded", () => {
         user.receiptsGenerated = result.receiptsGenerated
         localStorage.setItem("user", JSON.stringify(user))
 
-        // Show preview
+        // Show preview with download link
         document.getElementById("previewSection").style.display = "block"
-        updatePreview()
+        document.getElementById("actualReceipt").innerHTML = receiptHTML
+
+        // Add download link section
+        const downloadSection = document.createElement("div")
+        downloadSection.className = "download-section"
+        downloadSection.innerHTML = `
+          <h3>Share Your Receipt</h3>
+          <div class="download-link-container">
+            <input type="text" id="receipt-link" value="${window.location.origin}${result.receiptLink}" readonly>
+            <button id="copy-link" class="btn-primary">Copy Link</button>
+          </div>
+          <a href="${result.receiptLink}" target="_blank" class="btn-primary">View Receipt</a>
+        `
+
+        document.getElementById("actualReceipt").appendChild(downloadSection)
+
+        // Add copy functionality
+        document.getElementById("copy-link").addEventListener("click", function () {
+          const linkInput = document.getElementById("receipt-link")
+          linkInput.select()
+          document.execCommand("copy")
+          this.textContent = "Copied!"
+          setTimeout(() => {
+            this.textContent = "Copy Link"
+          }, 2000)
+        })
       } else {
         const result = await response.json()
         showNotification(result.error || "Failed to generate receipt", "error")
@@ -619,4 +651,59 @@ document.addEventListener("DOMContentLoaded", () => {
       notification.classList.remove("show")
     }, 3000)
   }
+
+  // Add this CSS to the existing styles
+  const additionalStyles = `
+  .download-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    text-align: center;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .download-section h3 {
+    margin-bottom: 1rem;
+    color: #374151;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  
+  .download-link-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+  
+  .download-link-container input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: white;
+  }
+  
+  .download-link-container button {
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    .download-link-container {
+      flex-direction: column;
+    }
+    
+    .download-link-container input {
+      margin-bottom: 0.5rem;
+    }
+  }
+`
+
+  // Create and append style element
+  const styleElement = document.createElement("style")
+  styleElement.textContent = additionalStyles
+  document.head.appendChild(styleElement)
 })

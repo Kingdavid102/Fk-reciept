@@ -5,6 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create Receipt</title>
   <link rel="stylesheet" href="styless.css">
+  <style>
+    .download-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .download-section p {
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .download-link-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+
+    .download-link-container input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      background: white;
+    }
+
+    .download-link-container button {
+      padding: 8px 16px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 480px) {
+      .download-link-container {
+        flex-direction: column;
+      }
+      
+      .download-link-container input {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="main-header">
@@ -108,8 +154,8 @@
       window.location.href = 'dashboard.html';
     });
 
-    // Form submission handler
-    document.getElementById('receipt-form').addEventListener('submit', function(e) {
+    // Replace the existing form submission handler with this updated version
+    document.getElementById('receipt-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       const formData = {
@@ -124,11 +170,80 @@
       };
       
       // Generate receipt preview
-      generateReceiptPreview(formData);
+      const receiptHtml = generateReceiptPreview(formData);
       
-      // Hide form, show preview
-      document.getElementById('receipt-form-container').classList.add('hidden');
-      document.getElementById('receipt-preview').classList.remove('hidden');
+      // Get current user
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        alert('Please log in to generate receipts');
+        window.location.href = 'auth.html';
+        return;
+      }
+      
+      try {
+        // Save receipt to server
+        const response = await fetch('/api/receipts/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            receiptData: formData,
+            receiptHtml: receiptHtml
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          // Hide form, show preview with download link
+          document.getElementById('receipt-form-container').classList.add('hidden');
+          document.getElementById('receipt-preview').classList.remove('hidden');
+          
+          // Update receipt preview with download link
+          document.getElementById('receipt-preview').innerHTML = receiptHtml + `
+            <div class="receipt-actions">
+              <button id="back-to-form" class="button-secondary">Back</button>
+              <div class="download-section">
+                <p>Share this receipt:</p>
+                <div class="download-link-container">
+                  <input type="text" id="receipt-link" value="${window.location.origin}${result.receiptLink}" readonly>
+                  <button id="copy-link" class="button-primary">Copy Link</button>
+                </div>
+                <a href="${result.receiptLink}" target="_blank" class="button-primary">View Receipt</a>
+              </div>
+              <button id="done-button" class="button-primary">Done</button>
+            </div>
+          `;
+          
+          // Add event listeners
+          document.getElementById('back-to-form').addEventListener('click', function() {
+            document.getElementById('receipt-form-container').classList.remove('hidden');
+            document.getElementById('receipt-preview').classList.add('hidden');
+          });
+          
+          document.getElementById('copy-link').addEventListener('click', function() {
+            const linkInput = document.getElementById('receipt-link');
+            linkInput.select();
+            document.execCommand('copy');
+            this.textContent = 'Copied!';
+            setTimeout(() => {
+              this.textContent = 'Copy Link';
+            }, 2000);
+          });
+          
+          document.getElementById('done-button').addEventListener('click', function() {
+            window.location.href = 'dashboard.html';
+          });
+          
+        } else {
+          alert(result.error || 'Failed to generate receipt');
+        }
+      } catch (error) {
+        console.error('Error generating receipt:', error);
+        alert('Network error. Please try again.');
+      }
     });
 
     // Generate receipt preview based on receipt type and form data
@@ -265,25 +380,7 @@
           receiptHTML = generateGenericReceipt(formData, statusIcons, confirmationNumber, currentDate);
       }
       
-      // Add action buttons
-      receiptHTML += `
-        <div class="receipt-actions">
-          <button id="back-to-form" class="button-secondary">Back</button>
-          <button id="done-button" class="button-primary">Done</button>
-        </div>
-      `;
-      
-      previewContainer.innerHTML = receiptHTML;
-      
-      // Add event listeners to buttons
-      document.getElementById('back-to-form').addEventListener('click', function() {
-        document.getElementById('receipt-form-container').classList.remove('hidden');
-        document.getElementById('receipt-preview').classList.add('hidden');
-      });
-      
-      document.getElementById('done-button').addEventListener('click', function() {
-        window.location.href = 'dashboard.html';
-      });
+      return receiptHTML;
     }
 
     // Template generators for each receipt type
@@ -796,7 +893,7 @@
             Add a Siri shortcut, such as "Pay ${formData.name || 'TYREE'}," to save time when sending money.
             
             <div class="siri-button">
-              <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzOCAzOCI+PHBhdGggZD0iTTE5IDJDOSAyIDEgMTAgMSAyMHM4IDE4IDE4IDE4IDE4LTggMTgtMThTMjkgMiAxOSAyeiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xOSAyQzkgMiAxIDEwIDEgMjBzOCAxOCAxOCAxOCAxOC04IDE4LTE4UzI5IDIgMTkgMnoiIGZpbGw9InVybCgjYSkiLz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImEiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMzggMCAwIDM4IDE5IDIwKSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmU1MjJmIi8+PHN0b3Agb2Zmc2V0PSIuMSIgc3RvcC1jb2xvcj0iI2ZlNTIyZiIvPjxzdG9wIG9mZnNldD0iLjIiIHN0b3AtY29sb3I9IiNmZDZiMmQiLz48c3RvcCBvZmZzZXQ9Ii4zIiBzdG9wLWNvbG9yPSIjZmM4MzJjIi8+PHN0b3Agb2Zmc2V0PSIuNCIgc3RvcC1jb2xvcj0iI2ZjOWIyYSIvPjxzdG9wIG9mZnNldD0iLjUiIHN0b3AtY29sb3I9IiNmYmIyMjgiLz48c3RvcCBvZmZzZXQ9Ii42IiBzdG9wLWNvbG9yPSIjZGZjOTJhIi8+PHN0b3Agb2Zmc2V0PSIuNyIgc3RvcC1jb2xvcj0iI2MzZGYyYyIvPjxzdG9wIG9mZnNldD0iLjgiIHN0b3AtY29sb3I9IiM1OWYxN2YiLz48c3RvcCBvZmZzZXQ9Ii45IiBzdG9wLWNvbG9yPSIjMGZiZGQ0Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGY3OGQ0Ii8+PC9yYWRpYWxHcmFkaWVudD48L2RlZnM+PC9zdmc+" alt="Siri logo" width="30" height="30">
+              <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzOCAzOCI+PHBhdGggZD0iTTE5IDJDOSAyIDEgMTAgMSAyMHM4IDE4IDE4IDE4IDE4LTggMTgtMThTMjkgMiAxOSAyeiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xOSAyQIDJDOSAyIDEgMTAgMSAyMHM4IDE4IDE4IDE4IDE4LTggMTgtMThTMjkgMiAxOSAyeiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xOSAyQzkgMiAxIDEwIDEgMjBzOCAxOCAxOCAxOCAxOC04IDE4LTE4UzI5IDIgMTkgMnoiIGZpbGw9InVybCgjYSkiLz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImEiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMzggMCAwIDM4IDE5IDIwKSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmU1MjJmIi8+PHN0b3Agb2Zmc2V0PSIuMSIgc3RvcC1jb2xvcj0iI2ZlNTIyZiIvPjxzdG9wIG9mZnNldD0iLjIiIHN0b3AtY29sb3I9IiNmZDZiMmQiLz48c3RvcCBvZmZzZXQ9Ii4zIiBzdG9wLWNvbG9yPSIjZmM4MzJjIi8+PHN0b3Agb2Zmc2V0PSIuNCIgc3RvcC1jb2xvcj0iI2ZjOWIyYSIvPjxzdG9wIG9mZnNldD0iLjUiIHN0b3AtY29sb3I9IiNmYmIyMjgiLz48c3RvcCBvZmZzZXQ9Ii42IiBzdG9wLWNvbG9yPSIjZGZjOTJhIi8+PHN0b3Agb2Zmc2V0PSIuNyIgc3RvcC1jb2xvcj0iI2MzZGYyYyIvPjxzdG9wIG9mZnNldD0iLjgiIHN0b3AtY29sb3I9IiM1OWYxN2YiLz48c3RvcCBvZmZzZXQ9Ii45IiBzdG9wLWNvbG9yPSIjMGZiZGQ0Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGY3OGQ0Ii8+PC9yYWRpYWxHcmFkaWVudD48L2RlZnM+PC9zdmc+" alt="Siri logo" width="30" height="30">
           <span>Add to Siri</span>
         </div>
       </div>
